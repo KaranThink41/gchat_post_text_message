@@ -9,15 +9,32 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import fetch from "node-fetch";
 import * as dotenv from "dotenv";
+import { join } from 'path';
+
+dotenv.config({ path: join(process.cwd(), '.env') }); // Load environment variables from .env file
 
 class GoogleChatServer {
   private server: Server;
+  private spaceId: string | undefined;
+  private apiKey: string | undefined;
+  private apiToken: string | undefined;
 
   constructor() {
     this.server = new Server(
       { name: "google-chat-server", version: "0.1.0" },
       { capabilities: { tools: {} } }
     );
+
+    this.spaceId = process.env.GOOGLE_CHAT_SPACE_ID;
+    this.apiKey = process.env.GOOGLE_CHAT_API_KEY;
+    this.apiToken = process.env.GOOGLE_CHAT_TOKEN;
+
+    if (!this.spaceId || !this.apiKey || !this.apiToken) {
+      console.error(
+        "Error: GOOGLE_CHAT_SPACE_ID, GOOGLE_CHAT_API_KEY, and GOOGLE_CHAT_TOKEN must be set in .env"
+      );
+      process.exit(1);
+    }
 
     this.setupToolHandlers();
 
@@ -28,35 +45,21 @@ class GoogleChatServer {
     });
   }
 
-  // Define the tool: post_text_message.
   private setupToolHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
           name: "post_text_message",
-          description:
-            "Post a text message to a Google Chat space via a provided space_id, key and token.",
+          description: "Post a text message to a Google Chat space.",
           inputSchema: {
             type: "object",
             properties: {
-              space_id: {
-                type: "string",
-                description: "The ID of the Google Chat space.",
-              },
-              key: {
-                type: "string",
-                description: "The API key for Google Chat.",
-              },
-              token: {
-                type: "string",
-                description: "The token for Google Chat.",
-              },
               text: {
                 type: "string",
                 description: "The text content of the message to be posted.",
               },
             },
-            required: ["space_id", "key", "token", "text"],
+            required: ["text"],
           },
         },
       ],
@@ -77,21 +80,18 @@ class GoogleChatServer {
     });
   }
 
-  // Tool: Post a text message via webhook.
   private async handlePostTextMessage(args: any): Promise<any> {
     try {
-      const { space_id, key, token, text } = args;
+      const { text } = args;
       const payload = { text };
 
-      // Log the values for debugging
-      console.log("space_id:", space_id);
-      console.log("key:", key);
-      console.log("token:", token);
+      console.log("space_id:", this.spaceId);
+      console.log("key:", this.apiKey);
+      console.log("token:", this.apiToken);
       console.log("text:", text);
 
-      // Send the message via a POST request.
       const response = await fetch(
-        `https://chat.googleapis.com/v1/spaces/${space_id}/messages?key=${key}&token=${token}`,
+        `https://chat.googleapis.com/v1/spaces/${this.spaceId}/messages?key=${this.apiKey}&token=${this.apiToken}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -127,7 +127,6 @@ class GoogleChatServer {
     }
   }
 
-  // Run the MCP server using stdio transport.
   public async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
