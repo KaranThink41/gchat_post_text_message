@@ -5,13 +5,33 @@ startCommand:
   configSchema:
     # JSON Schema defining the configuration options for the MCP.
     type: object
-    required: []
-    properties: {}
+    required:
+      - GOOGLE_CHAT_SPACE_ID
+      - GOOGLE_CHAT_API_KEY
+      - GOOGLE_CHAT_TOKEN
+    properties:
+      GOOGLE_CHAT_SPACE_ID:
+        type: string
+        description: Space ID from Google Chat
+      GOOGLE_CHAT_API_KEY:
+        type: string
+        description: API key from Google Cloud Console
+      GOOGLE_CHAT_TOKEN:
+        type: string
+        description: Authentication token for Google Chat
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
-    () => ({
+    (config) => ({
       command: 'node',
       args: ['build/index.js'],
-      env: {}
+      env: {
+        GOOGLE_CHAT_SPACE_ID: config.GOOGLE_CHAT_SPACE_ID,
+        GOOGLE_CHAT_API_KEY: config.GOOGLE_CHAT_API_KEY,
+        GOOGLE_CHAT_TOKEN: config.GOOGLE_CHAT_TOKEN
+      }
     })
+  exampleConfig:
+    GOOGLE_CHAT_SPACE_ID: your_space_id_here
+    GOOGLE_CHAT_API_KEY: your_api_key_here
+    GOOGLE_CHAT_TOKEN: your_token_here

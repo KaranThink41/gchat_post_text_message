@@ -1,6 +1,6 @@
 # Google Chat MCP Server
 
-A Model Context Protocol (MCP) server implementation for interacting with Google Chat API via webhooks. This server provides a simple tool for posting text messages to Google Chat spaces.
+A Model Context Protocol (MCP) server implementation for interacting with the Google Chat API via webhooks. This server provides a simple tool for posting text messages to Google Chat spaces.
 
 ## Features
 
@@ -16,7 +16,7 @@ A Model Context Protocol (MCP) server implementation for interacting with Google
 Install the server using Smithery's CLI:
 
 ```bash
-npx spinai-mcp install @KaranThink41/google_chat_mcp_server --provider smithery
+npx spinai-mcp install @KaranThink41/gchat_post_text_message --provider smithery
 ```
 
 ### Local Development
@@ -42,9 +42,26 @@ npm run build
 node build/index.js
 ```
 
+### Docker Setup
+
+You can run the server using Docker. Here's how to set it up:
+
+1. Build the Docker image:
+```bash
+docker build -t google-chat-mcp-server .
+```
+
+2. Run the Docker container with the necessary environment variables:
+```bash
+docker run -e GOOGLE_CHAT_SPACE_ID=your_space_id \
+          -e GOOGLE_CHAT_API_KEY=your_api_key \
+          -e GOOGLE_CHAT_TOKEN=your_token \
+          google-chat-mcp-server
+```
+
 ## Usage Example
 
-To post a message to Google Chat:
+To post a message to Google Chat, send the following JSON request:
 
 ```json
 {
@@ -52,7 +69,9 @@ To post a message to Google Chat:
   "params": {
     "name": "post_text_message",
     "arguments": {
-      "webhook": "https://chat.googleapis.com/v1/spaces/AAAA.../messages?key=YOUR_KEY&token=YOUR_TOKEN",
+      "space_id": "your_space_id",
+      "key": "your_api_key",
+      "token": "your_token",
       "text": "Hello, this is a test message!"
     }
   }
@@ -61,12 +80,21 @@ To post a message to Google Chat:
 
 ## Configuration
 
-The server requires a webhook URL to function. You can obtain this URL by:
+The server requires the following environment variables to function:
 
-1. Going to your Google Chat space
-2. Clicking on the three dots (...) in the top-right corner
-3. Selecting "Get webhook URL"
-4. Copying the provided URL
+- `GOOGLE_CHAT_SPACE_ID`: The Space ID of your Google Chat space
+- `GOOGLE_CHAT_API_KEY`: The API key for your Google Cloud project
+- `GOOGLE_CHAT_TOKEN`: The authentication token for Google Chat
+
+These variables can be set in your environment or via Docker (as shown in the Docker Setup section).
+
+To run locally without Docker, create a `.env` file with the following content:
+
+```
+GOOGLE_CHAT_SPACE_ID=your_space_id
+GOOGLE_CHAT_API_KEY=your_api_key
+GOOGLE_CHAT_TOKEN=your_token
+```
 
 ## Security
 

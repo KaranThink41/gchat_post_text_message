@@ -35,21 +35,28 @@ class GoogleChatServer {
         {
           name: "post_text_message",
           description:
-            "Post a text message to a Google Chat space via a provided webhook URL.",
+            "Post a text message to a Google Chat space via a provided space_id, key and token.",
           inputSchema: {
             type: "object",
             properties: {
-              webhook: {
+              space_id: {
                 type: "string",
-                description:
-                  "The full Google Chat webhook URL (e.g., https://chat.googleapis.com/v1/spaces/AAAA.../messages?key=YOUR_KEY&token=YOUR_TOKEN).",
+                description: "The ID of the Google Chat space.",
+              },
+              key: {
+                type: "string",
+                description: "The API key for Google Chat.",
+              },
+              token: {
+                type: "string",
+                description: "The token for Google Chat.",
               },
               text: {
                 type: "string",
                 description: "The text content of the message to be posted.",
               },
             },
-            required: ["webhook", "text"],
+            required: ["space_id", "key", "token", "text"],
           },
         },
       ],
@@ -73,18 +80,24 @@ class GoogleChatServer {
   // Tool: Post a text message via webhook.
   private async handlePostTextMessage(args: any): Promise<any> {
     try {
-      const { webhook, text } = args;
-      if (!webhook) {
-        throw new Error("Webhook URL is required.");
-      }
+      const { space_id, key, token, text } = args;
       const payload = { text };
 
+      // Log the values for debugging
+      console.log("space_id:", space_id);
+      console.log("key:", key);
+      console.log("token:", token);
+      console.log("text:", text);
+
       // Send the message via a POST request.
-      const response = await fetch(webhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `https://chat.googleapis.com/v1/spaces/${space_id}/messages?key=${key}&token=${token}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
