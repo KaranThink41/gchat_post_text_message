@@ -49,7 +49,7 @@ class GoogleChatServer {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
-          name: "post_text_message",
+          name: "post_text_message[GoogleChat]",
           description: "Post a text message to a Google Chat space.",
           inputSchema: {
             type: "object",
