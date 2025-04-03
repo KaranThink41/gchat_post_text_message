@@ -49,7 +49,7 @@ class GoogleChatServer {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
-          name: "post_text_message[GoogleChat]",
+          name: "post_text_message",
           description: "Post a text message to a Google Chat space.",
           inputSchema: {
             type: "object",
@@ -69,7 +69,7 @@ class GoogleChatServer {
       const toolName = request.params.name;
       const args = request.params.arguments;
       switch (toolName) {
-        case "post_text_message[GoogleChat]":
+        case "post_text_message":
           return await this.handlePostTextMessage(args);
         default:
           throw new McpError(
