@@ -69,7 +69,7 @@ class GoogleChatServer {
       const toolName = request.params.name;
       const args = request.params.arguments;
       switch (toolName) {
-        case "post_text_message":
+        case "post_text_message[GoogleChat]":
           return await this.handlePostTextMessage(args);
         default:
           throw new McpError(
